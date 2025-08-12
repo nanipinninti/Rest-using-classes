@@ -82,7 +82,7 @@ class EmployeeDetailsUsingGenerics(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'pk'
 
 '''
-
+'''
 class EmployeeViewset(viewsets.ViewSet):
     def list(self,req):
         queryset = Employee.objects.all()
@@ -113,3 +113,9 @@ class EmployeeViewset(viewsets.ViewSet):
         employee = get_object_or_404(Employee,pk=pk)
         serializer = EmployeeSerializer(employee)
         return Response("Delection succesfull",status=status.HTTP_204_NO_CONTENT)
+'''
+
+class EmployeeViewset(viewsets.ModelViewSet):
+    # All 5 operatiosn are done easily
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeSerializer
