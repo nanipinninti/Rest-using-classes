@@ -1,11 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render,get_object_or_404
 from employees.models import Employee
 from .serializers import EmployeeSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import Http404
-from rest_framework import generics,mixins
+from rest_framework import generics,mixins,viewsets
 # Create your views here.
 
 class EmployeeView(APIView):
@@ -70,6 +70,8 @@ class EmployeeDetailsUsingGenerics(mixins.RetrieveModelMixin,mixins.UpdateModelM
         return self.destroy(req,pk)
 '''
 
+
+'''
 class EmployeeViewUSingGenerics(generics.ListCreateAPIView):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
@@ -78,3 +80,36 @@ class EmployeeDetailsUsingGenerics(generics.RetrieveUpdateDestroyAPIView):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
     lookup_field = 'pk'
+
+'''
+
+class EmployeeViewset(viewsets.ViewSet):
+    def list(self,req):
+        queryset = Employee.objects.all()
+        serializer = EmployeeSerializer(queryset,many=True)
+        return Response(serializer.data)
+    
+    def create(self,req):
+        serializer = EmployeeSerializer(data=req.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.error_messages,status=status.HTTP_400_BAD_REQUEST)
+    
+    def retrieve(self,req,pk=None):
+        employee = get_object_or_404(Employee,pk=pk)
+        serializer = EmployeeSerializer(employee)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+    
+    def update(self,req,pk=None):
+            employee = get_object_or_404(Employee,pk=pk)
+            serializer = EmployeeSerializer(employee,data=req.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data,status=status.HTTP_200_OK)
+            return Response(serializer.error_messages,status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self,req,pk=None):
+        employee = get_object_or_404(Employee,pk=pk)
+        serializer = EmployeeSerializer(employee)
+        return Response("Delection succesfull",status=status.HTTP_204_NO_CONTENT)
