@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import Http404
+from rest_framework import generics,mixins
 # Create your views here.
 
 class EmployeeView(APIView):
@@ -43,3 +44,26 @@ class EmployeeDetailsView(APIView):
         employee = self.get_object(pk)
         employee.delete()
         return Response("Succesully deleted",status=status.HTTP_204_NO_CONTENT)
+
+class EmployeeViewUSingGenerics(mixins.ListModelMixin,mixins.CreateModelMixin,generics.GenericAPIView):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeSerializer
+
+    def get(self,req):
+        return self.list(req)
+
+    def post(self,req):
+        return self.create(req)
+    
+
+class EmployeeDetailsUsingGenerics(mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin,generics.GenericAPIView):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeSerializer
+
+    def get(self,req,pk):
+        return self.retrieve(req,pk)
+    def put(self,req,pk):
+        return self.update(req,pk)
+    def delete(self,req,pk):
+        return self.destroy(req,pk)
+    
